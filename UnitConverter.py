@@ -3,17 +3,25 @@ import tkinter as tk
 class UnitConverter(tk.Frame):
     def __init__(self,root):
         self.colour1 = '#cbdceb'
-        self.colour2 = '#7ea7ce'
-        self.colour3 = '#8ea7be'
+        self.colour2 = '#3c6f9f'
+        self.colour3 = '#ffffff'
         
-        self.conversions = ['km → mi',
+        self.conversions = {"Distance" : ['km → mi',
                             'mi → km',
-                            'kg → lbs',
-                            'lbs → kg',
-                            '°F → °C',
-                            '°C → °F',
-                            'hour → second',
-                            'second → hour']
+                            'ft → cm',
+                            'cm → ft',
+                            'inches → cm',
+                            'cm → inches',
+                            'km → cm',
+                            'cm → km'],
+                            "Weight": ['kg → lbs',
+                            'lbs → kg'],
+                            'Temperature': ['°F → °C',
+                            '°C → °F'],
+                            'Time': ['hour → second',
+                            'second → hour',
+                            'days → minutes',
+                            'minutes → days']}
         
         super().__init__(
             root,
@@ -21,7 +29,7 @@ class UnitConverter(tk.Frame):
         )
         
         self.main_frame = self
-        self.main_frame.pack(fill=tk.BOTH, expand=True)
+        self.main_frame.pack()
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.rowconfigure(2,weight=1)
         self.create_widgets()
@@ -30,27 +38,45 @@ class UnitConverter(tk.Frame):
         self.title = tk.Label(self.main_frame,
                               bg=self.colour1,
                               fg=self.colour2,
-                              font=('Arial',22,'bold'),
+                              font=('Arial',24,'bold underline'),
                               text="Unit Converter")
         
         self.title.grid(column=0,row=0,sticky=tk.EW,pady=(10,20))
         
+        self.category = tk.StringVar(value=list(self.conversions.keys())[0])
         self.conversion = tk.StringVar()
-        self.conversion.set(self.conversions[0])
+                
+        self.select_category = tk.OptionMenu(self.main_frame, self.category, *self.conversions.keys(), command=self.update_submenu)
         
-        def callback_trace_conversion(*args):
-            self.convert_value()
-            
-        self.conversion.trace('w', callback_trace_conversion)
+        self.select_category.config(
+            bg=self.colour3,
+            fg=self.colour2,
+            activebackground=self.colour3,
+            activeforeground=self.colour1,
+            font=('Arial',14),
+            border=0,
+            highlightthickness=0,
+            indicatoron=0,
+        )
+        self.select_category['menu'].config(
+            bg=self.colour3,
+            fg=self.colour2,
+            activebackground=self.colour1,
+            activeforeground=self.colour2,
+            font=('Arial',14),
+            activeborderwidth=0,
+            border=1,
+            relief=tk.FLAT
+        )
         
         self.select_conversion = tk.OptionMenu(
             self.main_frame,
             self.conversion,
-            *self.conversions
+            *self.conversions[self.category.get()]
         )
         self.select_conversion.config(
             bg=self.colour3,
-            fg=self.colour1,
+            fg=self.colour2,
             activebackground=self.colour3,
             activeforeground=self.colour1,
             font=('Arial',14),
@@ -60,7 +86,7 @@ class UnitConverter(tk.Frame):
         )
         self.select_conversion['menu'].config(
             bg=self.colour3,
-            fg=self.colour1,
+            fg=self.colour2,
             activebackground=self.colour1,
             activeforeground=self.colour2,
             font=('Arial',14),
@@ -68,11 +94,14 @@ class UnitConverter(tk.Frame):
             border=1,
             relief=tk.FLAT
         )
-        self.select_conversion.grid(column=0,row=1,sticky=tk.EW,padx=50)
+        self.select_category.grid(column=0,row=1,sticky=tk.EW,padx=50,pady=10)
+        self.select_conversion.grid(column=0,row=3,sticky=tk.EW,padx=50)
+        
+        self.update_submenu(self.category.get())
         
         self.container_values = tk.Frame(self.main_frame,bg=self.colour2)
         self.container_values.columnconfigure(1,weight=1)
-        self.container_values.grid(column=0,row=2,sticky=tk.NSEW,padx=50,pady=40)
+        self.container_values.grid(column=0,row=4,sticky=tk.NSEW,padx=50,pady=40)
         
         def validation(value):
             if not value or value == '-':
@@ -89,7 +118,7 @@ class UnitConverter(tk.Frame):
         self.value_to_convert = tk.Entry(
             self.container_values,
             bg=self.colour3,
-            fg=self.colour1,
+            fg=self.colour2,
             selectbackground=self.colour1,
             selectforeground=self.colour2,
             font=('Arial',14),
@@ -100,23 +129,24 @@ class UnitConverter(tk.Frame):
             validate='key',
             validatecommand=(value_validation_command,'%P',)
         )
-        self.value_to_convert.grid(column=0,row=0,sticky=tk.N,ipady=3)
+        self.value_to_convert.grid(column=0,row=0,sticky=tk.N,ipady=6)
         self.value_to_convert.bind('<KeyPress>', self.call_convert_value_delay)
         
         self.arrow = tk.Label(
             self.container_values,
-            bg=self.colour2,
+            bg=self.colour1,
+            fg=self.colour2,
             text="→",
-            font=('Arial',18)
+            font=('Arial',19)
         )
-        self.arrow.grid(column=1,row=0)
+        self.arrow.grid(column=1,row=0,ipady=1)
         self.converted_value = tk.StringVar()
         self.entry_converted_value = tk.Entry(
             self.container_values,
             bg=self.colour3,
-            fg=self.colour1,
+            fg=self.colour2,
             disabledbackground=self.colour3,
-            disabledforeground=self.colour1,
+            disabledforeground=self.colour2,
             font=('Arial',14),
             highlightthickness=0,
             border=0,
@@ -126,30 +156,47 @@ class UnitConverter(tk.Frame):
             cursor='arrow',
             textvariable=self.converted_value
         )
-        self.entry_converted_value.grid(column=2,row=0,sticky=tk.N, ipady=3)
+        self.entry_converted_value.grid(column=2,row=0,sticky=tk.N, ipady=6)
         
     def call_convert_value_delay(self,event):
         self.main_frame.after(100, self.convert_value)
-        
+                
     def convert_value(self):
         conversion = self.conversion.get()
+        value = self.value_to_convert.get()
 
-        if not self.value_to_convert.get() or self.value_to_convert.get() == "-":
+        if not value or value == "-":
             self.converted_value.set("")
             return
         
         value_to_convert_local = float(self.value_to_convert.get())
         
+        def callback_trace_conversion(*args):
+            self.convert_value()
+            
+        self.conversion.trace('w', callback_trace_conversion)
+        
         match conversion:
             case 'km → mi':
-                # append km to end of entry
-                self.converted_value.set(f"{value_to_convert_local/1.609:.5f}")
+                self.converted_value.set(f"{value_to_convert_local/1.609344:.5f}")
             case 'mi → km':
-                self.converted_value.set(f"{value_to_convert_local*1.609:.5f}")
+                self.converted_value.set(f"{value_to_convert_local*1.609344:.5f}")
+            case 'ft → cm':
+                self.converted_value.set(f"{value_to_convert_local*30.48:.5f}")
+            case 'cm → ft':
+                self.converted_value.set(f"{value_to_convert_local/30.48:.5f}")
+            case 'inches → cm':
+                self.converted_value.set(f"{value_to_convert_local*2.54:.5f}")
+            case 'cm → inches':
+                self.converted_value.set(f"{value_to_convert_local/2.54:.5f}")
+            case 'km → cm':
+                self.converted_value.set(f"{value_to_convert_local*100000:.5f}")
+            case 'cm → km':
+                self.converted_value.set(f"{value_to_convert_local/100000:.5f}")
             case 'kg → lbs':
-                self.converted_value.set(f"{value_to_convert_local*2.205:.5f}")
+                self.converted_value.set(f"{value_to_convert_local*2.2046:.5f}")
             case 'lbs → kg':
-                self.converted_value.set(f"{value_to_convert_local/2.205:.5f}")
+                self.converted_value.set(f"{value_to_convert_local/2.2046:.5f}")
             case '°F → °C':
                 self.converted_value.set(f"{(value_to_convert_local-32)*(5/9):.5f}")
             case '°C → °F':
@@ -158,6 +205,19 @@ class UnitConverter(tk.Frame):
                 self.converted_value.set(f"{(value_to_convert_local*3600):.5f}")
             case 'second → hour':
                 self.converted_value.set(f"{(value_to_convert_local/3600):.5f}")
+            case 'days → minutes':
+                self.converted_value.set(f"{(value_to_convert_local*1440):.5f}")
+            case 'minutes → days':
+                self.converted_value.set(f"{(value_to_convert_local/1440):.5f}")
+                
+    def update_submenu(self, category):
+        self.select_category = self.select_conversion['menu']
+        self.select_category.delete(0, 'end')
+        
+        for option in self.conversions[category]:
+            self.select_category.add_command(label=option, command=tk._setit(self.conversion, option))
+        
+        self.conversion.set(self.conversions[category][0])
 
         
         
@@ -165,7 +225,6 @@ class UnitConverter(tk.Frame):
 root = tk.Tk()
 unit_converter_app = UnitConverter(root)
 root.title("Unit Converter")
-root.geometry("400x250")
+root.geometry("400x300")
 root.resizable(width=False,height=False)
-
 root.mainloop()
