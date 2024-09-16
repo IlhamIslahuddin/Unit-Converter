@@ -15,7 +15,11 @@ class UnitConverter(tk.Frame):
                             'km → cm',
                             'cm → km'],
                             "Weight": ['kg → lbs',
-                            'lbs → kg'],
+                            'lbs → kg',
+                            'kg → stone',
+                            'stone → kg',
+                            'oz → g',
+                            'g → oz'],
                             'Temperature': ['°F → °C',
                             '°C → °F'],
                             'Time': ['hour → second',
@@ -96,6 +100,9 @@ class UnitConverter(tk.Frame):
         )
         self.select_category.grid(column=0,row=1,sticky=tk.EW,padx=50,pady=10)
         self.select_conversion.grid(column=0,row=3,sticky=tk.EW,padx=50)
+        
+        self.formula = tk.Label(self.main_frame,text="Formula",bg=self.colour1)
+        self.formula.grid(column=0,row=5)
         
         self.update_submenu(self.category.get())
         
@@ -178,36 +185,64 @@ class UnitConverter(tk.Frame):
         
         match conversion:
             case 'km → mi':
+                self.formula.configure(text=f"Formula: km / 1.609")
                 self.converted_value.set(f"{value_to_convert_local/1.609344:.5f}")
             case 'mi → km':
+                self.formula.configure(text=f"Formula: miles x 1.609")
                 self.converted_value.set(f"{value_to_convert_local*1.609344:.5f}")
             case 'ft → cm':
+                self.formula.configure(text=f"Formula: feet x 30.48")
                 self.converted_value.set(f"{value_to_convert_local*30.48:.5f}")
             case 'cm → ft':
+                self.formula.configure(text=f"Formula: cm / 30.48")
                 self.converted_value.set(f"{value_to_convert_local/30.48:.5f}")
             case 'inches → cm':
+                self.formula.configure(text=f"Formula: inches x 2.54")
                 self.converted_value.set(f"{value_to_convert_local*2.54:.5f}")
             case 'cm → inches':
+                self.formula.configure(text=f"Formula: cm / 2.54")
                 self.converted_value.set(f"{value_to_convert_local/2.54:.5f}")
             case 'km → cm':
+                self.formula.configure(text=f"Formula: km x 100,000")
                 self.converted_value.set(f"{value_to_convert_local*100000:.5f}")
             case 'cm → km':
+                self.formula.configure(text=f"Formula: cm / 100,000")
                 self.converted_value.set(f"{value_to_convert_local/100000:.5f}")
             case 'kg → lbs':
+                self.formula.configure(text=f"Formula: kg x 2.205")
                 self.converted_value.set(f"{value_to_convert_local*2.2046:.5f}")
             case 'lbs → kg':
+                self.formula.configure(text=f"Formula: lbs / 2.205")
                 self.converted_value.set(f"{value_to_convert_local/2.2046:.5f}")
+            case 'kg → stone':
+                self.formula.configure(text=f"Formula: kg / 6.35")
+                self.converted_value.set(f"{value_to_convert_local/6.35029:.5f}")
+            case 'stone → kg':
+                self.formula.configure(text=f"Formula: stone x 6.35")
+                self.converted_value.set(f"{value_to_convert_local*6.35029:.5f}")
+            case 'oz → g':
+                self.formula.configure(text=f"Formula: ounces x 28.35")
+                self.converted_value.set(f"{value_to_convert_local*28.3495:.5f}")
+            case 'g → oz':
+                self.formula.configure(text=f"Formula: grams / 28.35")
+                self.converted_value.set(f"{value_to_convert_local/28.3495:.5f}")
             case '°F → °C':
+                self.formula.configure(text=f"Formula: (°F-32) x (5/9)")
                 self.converted_value.set(f"{(value_to_convert_local-32)*(5/9):.5f}")
             case '°C → °F':
+                self.formula.configure(text=f"Formula: (°C x (9/5)) + 32")
                 self.converted_value.set(f"{(value_to_convert_local*(9/5))+32:.5f}")
             case 'hour → second':
+                self.formula.configure(text=f"Formula: hour x 3600")
                 self.converted_value.set(f"{(value_to_convert_local*3600):.5f}")
             case 'second → hour':
+                self.formula.configure(text=f"Formula: seconds / 3600")
                 self.converted_value.set(f"{(value_to_convert_local/3600):.5f}")
             case 'days → minutes':
+                self.formula.configure(text=f"Formula: days x 1440")
                 self.converted_value.set(f"{(value_to_convert_local*1440):.5f}")
             case 'minutes → days':
+                self.formula.configure(text=f"Formula: minutes / 1440")
                 self.converted_value.set(f"{(value_to_convert_local/1440):.5f}")
                 
     def update_submenu(self, category):
@@ -219,8 +254,6 @@ class UnitConverter(tk.Frame):
         
         self.conversion.set(self.conversions[category][0])
 
-        
-        
         
 root = tk.Tk()
 unit_converter_app = UnitConverter(root)
